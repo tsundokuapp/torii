@@ -1,0 +1,12 @@
+﻿################################################################################
+# Este arquivo .gitignore foi criado automaticamente pelo Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/TsundokuTraducoes.Auth.Api/.vs/TsundokuTraducoes.Auth.Api
+/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/bin/Debug/net8.0
+/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/obj
+/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/appsettings.json
+/TsundokuTraducoes.Helpers/obj
+/TsundokuTraducoes.Helpers/bin
+/TsundokuTraducoes.Auth.Api/.vs/ProjectEvaluation
