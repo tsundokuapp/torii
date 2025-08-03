@@ -3,9 +3,9 @@ using TsundokuTraducoes.Auth.Api.DTOs.Request;
 
 namespace TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 
-public interface IUsuarioAppService
+public interface ICadastroAppService
 {
-    Task<Result<string>> CadastrarUsuario(CadastroUsuarioRequest cadastroUsuarioDTO);
+    Task<Result<object>> CadastrarUsuario(CadastroUsuarioRequest cadastroUsuarioDTO);
 
     Task<Result> AtivaContaUsuario(AtivaUsuarioRequest ativaUsuarioRequest);
 }

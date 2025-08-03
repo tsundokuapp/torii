@@ -17,9 +17,16 @@ public static class DependenciesExtension
 
     public static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IUsuarioAppService, UsuarioAppService>();
+        services.AddScoped<ICadastroAppService, CadastroAppService>();
+        services.AddScoped<ICadastroService, CadastroService>();
 
-        services.AddScoped<IEmailMimeService, EmailMimeService>();
-        services.AddScoped<IUsuarioService, UsuarioService>();
+        services.AddScoped<ILoginAppService, LoginAppService>();
+        services.AddScoped<ILoginService, LoginService>();
+
+        services.AddScoped<ITokenAppService, TokenAppService>();
+        services.AddScoped<ITokenService, TokenService>();
+        
+        services.AddScoped<IEmailService, EmailService>();
+
     }
 }

@@ -8,7 +8,7 @@ using TsundokuTraducoes.Helpers.Configuration;
 
 namespace TsundokuTraducoes.Auth.Api.Services;
 
-public class EmailMimeService : IEmailMimeService
+public class EmailService : IEmailService
 {
     public void EnviaEmail(string[] destinatarios, string assunto, int usuarioId, string codigoConfirmacao)
     {

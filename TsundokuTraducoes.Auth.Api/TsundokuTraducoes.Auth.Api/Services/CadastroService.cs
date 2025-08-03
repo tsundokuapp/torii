@@ -8,55 +8,42 @@ using TsundokuTraducoes.Auth.Api.Services.Interfaces;
 
 namespace TsundokuTraducoes.Auth.Api.Services;
 
-public class UsuarioService : IUsuarioService
+public class CadastroService : ICadastroService
 {
     public readonly IMapper _mapper;
-    public readonly IEmailMimeService _emailServices;
+    public readonly IEmailService _emailServices;
     public UserManager<CustomIdentityUser> _userManager;
 
-    public UsuarioService(IMapper mapper, IEmailMimeService emailServices, UserManager<CustomIdentityUser> userManager)
+    public CadastroService(IMapper mapper, IEmailService emailServices, UserManager<CustomIdentityUser> userManager)
     {
         _mapper = mapper;
         _emailServices = emailServices;
         _userManager = userManager;
     }
 
-    public async Task<Result<string>> CadastrarUsuario(CadastroUsuarioRequest cadastroUsuarioDTO)
+    public async Task<Result<object>> CadastrarUsuario(CadastroUsuarioRequest cadastroUsuarioDTO)
     {
+        var usuarioExistente = _userManager.Users.FirstOrDefault(x => x.NormalizedEmail == cadastroUsuarioDTO.Email.ToUpper());
+        if (usuarioExistente is not null)
+            return Result.Fail("E-mail já cadastrado");
+
         var usuario = _mapper.Map<Usuario>(cadastroUsuarioDTO);
         CustomIdentityUser usuarioIdentity = _mapper.Map<CustomIdentityUser>(usuario);
         var resultadoIdentity = await _userManager.CreateAsync(usuarioIdentity, cadastroUsuarioDTO.Senha);
 
-        if (!resultadoIdentity.Succeeded)
-        {
-            var mensagensErro = string.Empty;
+        if (!resultadoIdentity.Succeeded) 
+            return Result.Fail(RetornaMensagemErroResultadoIdentity(resultadoIdentity));
 
-            foreach (var erro in resultadoIdentity.Errors)
-            {
-                mensagensErro += erro.Description + Environment.NewLine;
-            }            
-
-            return Result.Fail(mensagensErro);
-        }
-            
 
         await _userManager.AddToRoleAsync(usuarioIdentity, "leitor");
         if (!resultadoIdentity.Succeeded)
-        {
-            var mensagensErro = string.Empty;
-
-            foreach (var erro in resultadoIdentity.Errors)
-            {
-                mensagensErro += erro.Description + Environment.NewLine;
-            }
-
-            return Result.Fail(mensagensErro);
-        }
+            return Result.Fail(RetornaMensagemErroResultadoIdentity(resultadoIdentity));
 
         var codigoConfirmacao = _userManager.GenerateEmailConfirmationTokenAsync(usuarioIdentity).Result;
         _emailServices.EnviaEmail([usuarioIdentity.Email], "Ativação de conta", usuarioIdentity.Id, codigoConfirmacao);
-        return Result.Ok().WithSuccess(codigoConfirmacao);        
-    }
+        
+        return Result.Ok(new { IdUsuario = usuarioIdentity.Id, CodigoConfirmacao = codigoConfirmacao });
+    }    
 
     public async Task<Result> AtivaContaUsuario(AtivaUsuarioRequest ativaUsuarioRequest)
     {
@@ -68,5 +55,17 @@ public class UsuarioService : IUsuarioService
         }
 
         return Result.Fail("Falha na tentativa de ativação da conta!");
+    }
+
+    private static string RetornaMensagemErroResultadoIdentity(IdentityResult resultadoIdentity)
+    {
+        var mensagensErro = string.Empty;
+
+        foreach (var erro in resultadoIdentity.Errors)
+        {
+            mensagensErro += erro.Description + Environment.NewLine;
+        }
+
+        return mensagensErro;
     }
 }

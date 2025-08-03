@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TsundokuTraducoes.Auth.Api;
 using TsundokuTraducoes.Auth.Api.Data.Context;
 using TsundokuTraducoes.Auth.Api.Entities;
@@ -8,6 +11,7 @@ using TsundokuTraducoes.Helpers.Configuration;
 
 var _connectionStringConfig = new ConnectionStringConfig();
 var _acessoEmail = new AcessoEmail();
+var _jwtConfiguration = new JwtConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +22,10 @@ _acessoEmail.Password = builder.Configuration.GetSection("AcessoEmail").GetValue
 _acessoEmail.EmailAdminInicial = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("EmailAdminInicial");
 _acessoEmail.SenhaAdminInicial = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("SenhaAdminInicial");
 
-ConfigurationAutenticacaoExternal.SetaAcessoExterno(_acessoEmail);
+_jwtConfiguration.TokenSecret = builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("TokenSecret");
+_jwtConfiguration.RefreshTokenValidityInMinutes = Convert.ToInt32(builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("RefreshTokenValidityInMinutes"));
+
+ConfigurationAutenticacaoExternal.SetaAcessoExterno(_acessoEmail, _jwtConfiguration);
 
 _connectionStringConfig.ConnectionString = builder.Configuration.GetConnectionString("UsuarioConnection");
 SourceConnection.SetaConnectionStringConfig(_connectionStringConfig);
@@ -36,6 +43,29 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddServices();
+
+//definindo configurações de autenticação
+builder.Services.AddAuthentication(auth =>
+{
+    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(token =>
+{
+    token.RequireHttpsMetadata = false;
+    token.SaveToken = true;
+    token.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        //Mesma chave feita na classe Token Service
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_jwtConfiguration.TokenSecret)
+        ),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 builder.Services.AddControllers().AddNewtonsoftJson(
     option => option.SerializerSettings.ReferenceLoopHandling =
@@ -75,6 +105,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

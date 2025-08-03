@@ -7,9 +7,9 @@ namespace TsundokuTraducoes.Auth.Api.Controllers;
 [ApiController]
 public class CadastroController : ControllerBase
 {
-    private readonly IUsuarioAppService _usuarioAppService;
+    private readonly ICadastroAppService _usuarioAppService;
 
-    public CadastroController(IUsuarioAppService usuarioAppService)
+    public CadastroController(ICadastroAppService usuarioAppService)
     {
         _usuarioAppService = usuarioAppService;
     }
@@ -21,7 +21,7 @@ public class CadastroController : ControllerBase
         if (result.IsFailed)
             return BadRequest(result.Errors[0].Message);
 
-        return Ok(result.Value);
+        return Ok(result.ValueOrDefault);
     }
 
     [HttpGet("api/auth/ativar-conta/")]
@@ -32,5 +32,5 @@ public class CadastroController : ControllerBase
             return BadRequest(result.Errors[0].Message);
 
         return Ok(result.Successes[0]);
-    }    
+    }
 }
