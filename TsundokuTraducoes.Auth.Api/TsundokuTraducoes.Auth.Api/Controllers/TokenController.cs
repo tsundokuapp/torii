@@ -14,7 +14,7 @@ public class TokenController : ControllerBase
         _tokenAppService = tokenAppService;
     }
         
-    [HttpPost("api/auth/refresh-token/")]
+    [HttpPost("api/auth/refresh-token")]
     public async Task<IActionResult> RefreshToken(TokenRequest tokenRequest)
     {
         if (tokenRequest is null)

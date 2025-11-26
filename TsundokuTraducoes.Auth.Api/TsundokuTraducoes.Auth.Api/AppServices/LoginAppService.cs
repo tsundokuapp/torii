@@ -19,4 +19,14 @@ public class LoginAppService : ILoginAppService
     {
         return await _loginService.LogaUsuario(loginRequest);
     }
+
+    public async Task<Result> RecuperarSenha(string email)
+    {
+        return await _loginService.RecuperarSenha(email);
+    }
+
+    public async Task<Result> ResetarSenha(ResetarSenhaRequest resetarSenhaRequest)
+    {
+        return await _loginService.ResetarSenha(resetarSenhaRequest);
+    }
 }

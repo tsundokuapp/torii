@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentResults;
+using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
 
@@ -23,5 +24,25 @@ public class LoginController : ControllerBase
             return Unauthorized(result.Errors[0]);
 
         return Ok(result.ValueOrDefault);
+    }
+
+    [HttpGet("api/auth/recuperar-senha")]
+    public async Task<IActionResult> RecuperarSenha(string email)
+    {
+        var result = await _loginAppService.RecuperarSenha(email);
+        if (result.IsFailed)
+            return Unauthorized(result.Errors[0]);
+
+        return Ok(result.Successes[0]);
+    }
+
+    [HttpPost("api/auth/resetar-senha")]
+    public async Task<IActionResult> ResetarSenha(ResetarSenhaRequest resetarSenhaRequest)
+    {
+        var result = await _loginAppService.ResetarSenha(resetarSenhaRequest);
+        if (result.IsFailed)
+            return Unauthorized(result.Errors[0]);
+
+        return Ok(result.Successes[0]);
     }
 }

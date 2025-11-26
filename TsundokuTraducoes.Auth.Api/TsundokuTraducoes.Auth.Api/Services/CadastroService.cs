@@ -2,9 +2,12 @@
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Web;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.Entities;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
+using TsundokuTraducoes.Helpers.Configuration;
+using TsundokuTraducoes.Helpers.Utils.Enums;
 
 namespace TsundokuTraducoes.Auth.Api.Services;
 
@@ -40,9 +43,13 @@ public class CadastroService : ICadastroService
             return Result.Fail(RetornaMensagemErroResultadoIdentity(resultadoIdentity));
 
         var codigoConfirmacao = _userManager.GenerateEmailConfirmationTokenAsync(usuarioIdentity).Result;
-        _emailServices.EnviaEmail([usuarioIdentity.Email], "Ativação de conta", usuarioIdentity.Id, codigoConfirmacao);
+        var codigoConfirmacaoEncododo = HttpUtility.UrlEncode(codigoConfirmacao);
+
+        var linkEnvioCodigoAtivacao = $"{ConfigurationAutenticacaoExternal.RetornaUrlBaseApi()}/ativar-conta?UsuarioId={usuarioIdentity.Id}&CodigoAtivacao={codigoConfirmacaoEncododo}";
+
+        _emailServices.EnviaEmail([usuarioIdentity.Email], "Ativação de conta", linkEnvioCodigoAtivacao, TipoEnvioEmailEnum.AtivacaoConta);
         
-        return Result.Ok(new { IdUsuario = usuarioIdentity.Id, CodigoConfirmacao = codigoConfirmacao });
+        return Result.Ok(new { IdUsuario = usuarioIdentity.Id, CodigoConfirmacao = codigoConfirmacaoEncododo });
     }    
 
     public async Task<Result> AtivaContaUsuario(AtivaUsuarioRequest ativaUsuarioRequest)

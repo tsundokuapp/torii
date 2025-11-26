@@ -1,10 +1,14 @@
 ﻿using FluentResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Web;
+using TsundokuTraducoes.Auth.Api.DTOs;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
@@ -18,7 +22,7 @@ public class TokenService : ITokenService
     private readonly SignInManager<CustomIdentityUser> _signInManager;
     private readonly UserManager<CustomIdentityUser> _userManager;
 
-    public TokenService(SignInManager<CustomIdentityUser> signInManager, UserManager<CustomIdentityUser> userManager)
+    public TokenService(SignInManager<CustomIdentityUser> signInManager, UserManager<CustomIdentityUser> userManager, IEmailService emailServices)
     {
         _signInManager = signInManager;
         _userManager = userManager;
@@ -43,7 +47,7 @@ public class TokenService : ITokenService
             role => claims.Add(new Claim(ClaimTypes.Role, role))
         );
 
-        var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtTokenSecret()));
+        var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretToken()));
         var credenciais = new SigningCredentials(chave, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             claims: claims,
@@ -65,8 +69,8 @@ public class TokenService : ITokenService
         if (principal.ValueOrDefault is null)
             return Result.Fail("Access token/refresh token inválido.");
 
-        var username = principal.ValueOrDefault.Claims.FirstOrDefault(x => x.Type == "username")?.Value;        
-        
+        var username = principal.ValueOrDefault.Claims.FirstOrDefault(x => x.Type == "username")?.Value;
+
         var usuario = await _userManager.FindByNameAsync(username);
 
         if (usuario == null || usuario.RefreshToken != refreshToken ||
@@ -96,11 +100,11 @@ public class TokenService : ITokenService
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                               .GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtTokenSecret())),
+                               .GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretToken())),
             ValidateLifetime = false
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();        
+        var tokenHandler = new JwtSecurityTokenHandler();
 
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters,
                          out SecurityToken securityToken);
@@ -119,5 +123,78 @@ public class TokenService : ITokenService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Uri.EscapeDataString(Convert.ToBase64String(randomNumber));
+    }
+
+    public string GenerateResetToken(int userId)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretTokenReset());
+        var expires = DateTime.UtcNow.AddMinutes(ConfigurationAutenticacaoExternal.RetornaResetTokenValidityInMinutes());
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim("Purpose", "PasswordReset")
+            }),
+            Expires = expires,
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    public TokenRecuperacaoSenha ValidateTokenAndGetUserId(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretTokenReset());
+
+        try
+        {
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var codigoConfirmacaoEncododa = HttpUtility.UrlDecode(token);
+
+            var encodedToken = WebEncoders.Base64UrlDecode(codigoConfirmacaoEncododa);
+
+            var tokenRecuperacao = ByteArrayToObject<TokenRecuperacaoSenha>(encodedToken);
+
+
+            var principal = tokenHandler.ValidateToken(tokenRecuperacao.TokenResetSenha, validationParameters, out SecurityToken validatedToken);
+
+            var purposeClaim = principal.FindFirst("Purpose");
+            if (purposeClaim == null || purposeClaim.Value != "PasswordReset")
+            {
+                return null;
+            }
+
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                tokenRecuperacao.Id = userId;
+                return tokenRecuperacao;
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static T ByteArrayToObject<T>(byte[] bytes)
+    {        
+        string json = Encoding.UTF8.GetString(bytes);
+        return JsonSerializer.Deserialize<T>(json);
     }
 }

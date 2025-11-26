@@ -1,7 +1,8 @@
-﻿namespace TsundokuTraducoes.Auth.Api.Services.Interfaces
+﻿using TsundokuTraducoes.Helpers.Utils.Enums;
+
+namespace TsundokuTraducoes.Auth.Api.Services.Interfaces;
+
+public interface IEmailService
 {
-    public interface IEmailService
-    {
-        void EnviaEmail(string[] destinatarios, string assunto, int usuarioId, string codigoConfirmacao);
-    }
+    void EnviaEmail(string[] destinatarios, string assunto, string linkServicoSolici, TipoEnvioEmailEnum tipoEnvioEmailEnum);
 }

@@ -12,6 +12,7 @@ using TsundokuTraducoes.Helpers.Configuration;
 var _connectionStringConfig = new ConnectionStringConfig();
 var _acessoEmail = new AcessoEmail();
 var _jwtConfiguration = new JwtConfiguration();
+var _integrationUrlBase = new IntegrationUrlBase();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +23,15 @@ _acessoEmail.Password = builder.Configuration.GetSection("AcessoEmail").GetValue
 _acessoEmail.EmailAdminInicial = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("EmailAdminInicial");
 _acessoEmail.SenhaAdminInicial = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("SenhaAdminInicial");
 
-_jwtConfiguration.TokenSecret = builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("TokenSecret");
+_jwtConfiguration.SecretToken = builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("SecretToken");
 _jwtConfiguration.RefreshTokenValidityInMinutes = Convert.ToInt32(builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("RefreshTokenValidityInMinutes"));
+_jwtConfiguration.SecretTokenReset = builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("SecretTokenReset");
+_jwtConfiguration.ResetTokenValidityInMinutes = Convert.ToInt32(builder.Configuration.GetSection("JwtConfiguration").GetValue<string>("ResetTokenValidityInMinutes"));
 
-ConfigurationAutenticacaoExternal.SetaAcessoExterno(_acessoEmail, _jwtConfiguration);
+_integrationUrlBase.UrlBaseTsundokuApi = builder.Configuration.GetSection("IntegrationUrlBase").GetValue<string>("UrlBaseTsundokuApi");
+_integrationUrlBase.UrlBaseTsundokuWeb = builder.Configuration.GetSection("IntegrationUrlBase").GetValue<string>("UrlBaseTsundokuWeb");
+
+ConfigurationAutenticacaoExternal.SetaAcessoExterno(_acessoEmail, _jwtConfiguration, _integrationUrlBase);
 
 _connectionStringConfig.ConnectionString = builder.Configuration.GetConnectionString("UsuarioConnection");
 SourceConnection.SetaConnectionStringConfig(_connectionStringConfig);
@@ -59,7 +65,7 @@ builder.Services.AddAuthentication(auth =>
         ValidateIssuerSigningKey = true,
         //Mesma chave feita na classe Token Service
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_jwtConfiguration.TokenSecret)
+            Encoding.UTF8.GetBytes(_jwtConfiguration.SecretToken)
         ),
         ValidateIssuer = false,
         ValidateAudience = false,

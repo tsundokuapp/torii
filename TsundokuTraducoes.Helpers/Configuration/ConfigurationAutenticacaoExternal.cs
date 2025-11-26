@@ -7,11 +7,13 @@ public static class ConfigurationAutenticacaoExternal
 {
     private static AcessoEmail _acessoEmail;
     private static JwtConfiguration _jwtConfiguration;
+    private static IntegrationUrlBase _integrationUrlBase;
 
-    public static void SetaAcessoExterno(AcessoEmail acessoEmail, JwtConfiguration jwtConfiguration)
+    public static void SetaAcessoExterno(AcessoEmail acessoEmail, JwtConfiguration jwtConfiguration, IntegrationUrlBase integrationUrlBase)
     {
         _acessoEmail = acessoEmail;
         _jwtConfiguration = jwtConfiguration;
+        _integrationUrlBase = integrationUrlBase;
     }
 
     public static string RetornaRemetente()
@@ -62,12 +64,20 @@ public static class ConfigurationAutenticacaoExternal
         return email;
     }
 
-    public static string RetornaJwtTokenSecret()
+    public static string RetornaJwtSecretToken()
     {
-        var tokenSecret = ConfigurationManager.AppSettings["TokenSecret"];
-        tokenSecret ??= _jwtConfiguration.TokenSecret;
+        var secretToken = ConfigurationManager.AppSettings["SecretToken"];
+        secretToken ??= _jwtConfiguration.SecretToken;
 
-        return tokenSecret;
+        return secretToken;
+    }
+
+    public static string RetornaJwtSecretTokenReset()
+    {
+        var secretToken = ConfigurationManager.AppSettings["SecretTokenReset"];
+        secretToken ??= _jwtConfiguration.SecretTokenReset;
+
+        return secretToken;
     }
 
     public static int RetornaRefreshTokenValidityInMinutes()
@@ -76,6 +86,30 @@ public static class ConfigurationAutenticacaoExternal
         out int refreshTokenValidityInMinutes);        
 
         return refreshTokenValidityInMinutes > 0 ? refreshTokenValidityInMinutes : _jwtConfiguration.RefreshTokenValidityInMinutes;
+    }
+
+    public static int RetornaResetTokenValidityInMinutes()
+    {
+        _ = int.TryParse(ConfigurationManager.AppSettings["ResetTokenValidityInMinutes"],
+        out int resetTokenValidityInMinutes);
+
+        return resetTokenValidityInMinutes > 0 ? resetTokenValidityInMinutes : _jwtConfiguration.ResetTokenValidityInMinutes;
+    }
+
+    public static string RetornaUrlBaseApi()
+    {
+        var urlBaseApi = ConfigurationManager.AppSettings["UrlBaseTsundokuApi"];
+        urlBaseApi ??= _integrationUrlBase.UrlBaseTsundokuApi;
+
+        return urlBaseApi;
+    }
+
+    public static string RetornaUrlBaseWeb()
+    {
+        var urlBaseFrontEnd = ConfigurationManager.AppSettings["UrlBaseTsundokuWeb"];
+        urlBaseFrontEnd ??= _integrationUrlBase.UrlBaseTsundokuWeb;
+
+        return urlBaseFrontEnd;
     }
 }
 
@@ -91,6 +125,14 @@ public class AcessoEmail
 
 public class JwtConfiguration
 {
-    public string TokenSecret { get; set; }
+    public string SecretToken { get; set; }
     public int RefreshTokenValidityInMinutes { get; set; }
+    public string SecretTokenReset { get; set; }
+    public int ResetTokenValidityInMinutes { get; set; }
+}
+
+public class IntegrationUrlBase
+{
+    public string UrlBaseTsundokuApi { get; set; }
+    public string UrlBaseTsundokuWeb { get; set; }
 }

@@ -1,19 +1,18 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
-using System.Web;
 using TsundokuTraducoes.Auth.Api.Entities;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
 using TsundokuTraducoes.Helpers.Configuration;
+using TsundokuTraducoes.Helpers.Utils.Enums;
 
 namespace TsundokuTraducoes.Auth.Api.Services;
 
 public class EmailService : IEmailService
-{
-    public void EnviaEmail(string[] destinatarios, string assunto, int usuarioId, string codigoConfirmacao)
+{   
+    public void EnviaEmail(string[] destinatarios, string assunto, string linkServicoSolicitado, TipoEnvioEmailEnum tipoEnvioEmailEnum)
     {
-        //Encodando o codigoConfirmacao para não ter problemas na hora de passar a variável pela url como parâmetro
-        var mensagem = new Mensagem(destinatarios, assunto, usuarioId, HttpUtility.UrlEncode(codigoConfirmacao));
+        var mensagem = new Mensagem(destinatarios, assunto, linkServicoSolicitado, tipoEnvioEmailEnum);
         var memsagemDeEmail = RetornaCorpoDoEmail(mensagem);
         Enviar(memsagemDeEmail);
     }

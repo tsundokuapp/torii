@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using TsundokuTraducoes.Auth.Api.DTOs;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
@@ -10,5 +11,10 @@ public interface ITokenService
     Token CreateToken(CustomIdentityUser usuario, List<string> roles);
 
     Task<Result<TokenResponse>> RefreshToken(TokenRequest tokenRequest);
+
     string GenerateRefreshToken();
+
+    string GenerateResetToken(int userId);
+
+    TokenRecuperacaoSenha ValidateTokenAndGetUserId(string token);
 }
