@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsundokuTraducoes.Auth.Api", "TsundokuTraducoes.Auth.Api\TsundokuTraducoes.Auth.Api.csproj", "{8697A47C-107C-43BD-8C0C-F43A5D4D177E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsundokuTraducoes.Helpers", "..\TsundokuTraducoes.Helpers\TsundokuTraducoes.Helpers.csproj", "{E1DA6F16-3E53-4703-BD62-04E8004B2B79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0-Api", "0-Api", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1-Helpers", "1-Helpers", "{C87F4FC9-7989-4491-A2C5-C166F9B7D19B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +28,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8697A47C-107C-43BD-8C0C-F43A5D4D177E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E1DA6F16-3E53-4703-BD62-04E8004B2B79} = {C87F4FC9-7989-4491-A2C5-C166F9B7D19B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DD7F53F0-E95C-45D4-90DC-7AF7799CEB95}

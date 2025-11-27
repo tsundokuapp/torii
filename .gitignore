@@ -10,3 +10,25 @@
 /TsundokuTraducoes.Helpers/obj
 /TsundokuTraducoes.Helpers/bin
 /TsundokuTraducoes.Auth.Api/.vs/ProjectEvaluation
+
+
+# Config files
+/.idea/
+*.user
+.vscode/
+
+# Output folder used by Webpack or other FE stuff
+**/node_modules/*
+**/wwwroot/*
+
+# Tests
+*.Tests/bin
+*.Tests/obj
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+/TsundokuTraducoes.Auth.Api/appsettings.json
