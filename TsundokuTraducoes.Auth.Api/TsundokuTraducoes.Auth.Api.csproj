@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TsundokuTraducoes.Helpers\TsundokuTraducoes.Helpers.csproj" />
+    <ProjectReference Include="..\TsundokuTraducoes.Helpers\TsundokuTraducoes.Helpers.csproj" />
   </ItemGroup>
 
 </Project>

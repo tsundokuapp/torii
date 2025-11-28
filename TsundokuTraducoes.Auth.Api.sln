@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsundokuTraducoes.Auth.Api", "TsundokuTraducoes.Auth.Api\TsundokuTraducoes.Auth.Api.csproj", "{8697A47C-107C-43BD-8C0C-F43A5D4D177E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsundokuTraducoes.Helpers", "..\TsundokuTraducoes.Helpers\TsundokuTraducoes.Helpers.csproj", "{E1DA6F16-3E53-4703-BD62-04E8004B2B79}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsundokuTraducoes.Helpers", "TsundokuTraducoes.Helpers\TsundokuTraducoes.Helpers.csproj", "{E1DA6F16-3E53-4703-BD62-04E8004B2B79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0-Api", "0-Api", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
