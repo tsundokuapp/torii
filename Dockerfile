@@ -12,6 +12,7 @@ COPY ["/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.
 COPY ["/TsundokuTraducoes.Helpers/TsundokuTraducoes.Helpers.csproj", "TsundokuTraducoes.Helpers/"]
 
 RUN dotnet restore "./TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj"
+RUN dotnet restore "./TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Helpers.csproj"
 COPY . .
 
 WORKDIR "/src/TsundokuTraducoes.Auth.Api"
