@@ -14,7 +14,7 @@ COPY ["/TsundokuTraducoes.Helpers/TsundokuTraducoes.Helpers.csproj", "TsundokuTr
 RUN dotnet restore "./TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj"
 COPY . .
 
-WORKDIR "/src/TsundokuTraducoes.Auth"
+WORKDIR "/src/TsundokuTraducoes.Auth.Api"
 RUN dotnet build "./TsundokuTraducoes.Auth.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build as publish
