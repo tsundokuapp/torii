@@ -17,7 +17,7 @@ RUN dotnet restore "./TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.cspr
 COPY . .
 
 WORKDIR "/src/TsundokuTraducoes.Auth.Api"
-RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build /p:UseAppHost=false
 
 FROM build as publish
 ARG BUILD_CONFIGURATION=Release
