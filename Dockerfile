@@ -8,7 +8,7 @@ EXPOSE 8083
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj", "TsundokuTraducoes"]
+COPY ["/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj", "TsundokuTraducoes/"]
 COPY ["/TsundokuTraducoes.Helpers/TsundokuTraducoes.Helpers.csproj", "TsundokuTraducoes.Helpers/"]
 
 RUN dotnet restore "./TsundokuTraducoes/TsundokuTraducoes.Auth.Api.csproj"
