@@ -31,12 +31,22 @@ public class LoginService : ILoginService
 
     public async Task<Result<TokenResponse>> LogaUsuario(LoginRequest loginRequest)
     {
+        var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.UserName.ToUpper());
+
+        if (usuario == null)
+            return Result.Fail("Erro ao logar: usuário ou senha inválidos");
+        
+        var podeLogar = await _signInManager.CanSignInAsync(usuario);
+        if (!podeLogar)
+        {
+            // Se a autenticação por celular for habilitada, esse trecho precisa ser refatorado.
+            return Result.Fail("Não é possível logar sem confirmar o e-mail.");
+        }
+        
         var resultadoIdentity = await _signInManager.PasswordSignInAsync(loginRequest.UserName, loginRequest.Password, false, false);
 
         if (resultadoIdentity.Succeeded)
         {
-            var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.UserName.ToUpper());
-
             var refreshToken = _tokenService.GenerateRefreshToken();
             usuario.RefreshToken = refreshToken;
             usuario.RefreshTokenExpiryTime = DateTime.Now.AddMinutes(ConfigurationAutenticacaoExternal.RetornaRefreshTokenValidityInMinutes());
@@ -53,7 +63,7 @@ public class LoginService : ILoginService
             });
         }
 
-        return Result.Fail("Erro na tentativa de login");
+        return Result.Fail("Erro ao logar: usuário ou senha inválidos");
     }
 
     public async Task<Result> RecuperarSenha(string email)
