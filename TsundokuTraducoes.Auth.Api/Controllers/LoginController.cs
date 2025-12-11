@@ -18,6 +18,16 @@ public class LoginController : ControllerBase
     [HttpPost("api/auth/login/")]
     public async Task<IActionResult> LogarUsuario(LoginRequest loginRequest)
     {
+        if (loginRequest.UserName == null)
+        {
+            return BadRequest(new { message = "Nome de usuário é obrigatório." });
+        }
+
+        if (loginRequest.Password == null)
+        {
+            return BadRequest(new { message = "Senha é obrigatória." });
+        }
+        
         var result = await _loginAppService.LogaUsuario(loginRequest);
 
         if (result.IsFailed)
