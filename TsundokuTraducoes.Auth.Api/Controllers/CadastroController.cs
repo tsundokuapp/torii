@@ -17,6 +17,22 @@ public class CadastroController : ControllerBase
     [HttpPost("api/auth/cadastro/")]
     public async Task<IActionResult> CadastraUsuario([FromBody] CadastroUsuarioRequest cadastroUsuarioRequest)
     {
+        
+        if (cadastroUsuarioRequest.UserName == null)
+        {
+            return BadRequest(new { message = "Nome de usuário é obrigatório." });
+        }
+        
+        if (cadastroUsuarioRequest.Senha == null)
+        {
+            return BadRequest(new { message = "Senha é obrigatório." });
+        }
+        
+        if (cadastroUsuarioRequest.Email == null)
+        {
+            return BadRequest(new { message = "E-mail é obrigatório." });
+        }
+        
         var result = await _usuarioAppService.CadastrarUsuario(cadastroUsuarioRequest);
         if (result.IsFailed)
             return BadRequest(result.Errors[0].Message);
