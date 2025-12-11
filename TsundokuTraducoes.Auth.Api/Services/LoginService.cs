@@ -29,7 +29,7 @@ public class LoginService : ILoginService
         _userManager = userManager;
     }
 
-    public async Task<Result<TokenResponse>> LogaUsuario(LoginRequest loginRequest)
+    public async Task<Result<LoginResponse>> LogaUsuario(LoginRequest loginRequest)
     {
         var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.UserName.ToUpper());
 
@@ -56,8 +56,9 @@ public class LoginService : ILoginService
             //Criando e retornando token com roles
             var token = _tokenService.CreateToken(usuario, _signInManager.UserManager.GetRolesAsync(usuario).Result.ToList());
 
-            return Result.Ok(new TokenResponse
+            return Result.Ok(new LoginResponse
             {
+                UserName = usuario.UserName,
                 AccessToken = token.Value,
                 RefreshToken = usuario.RefreshToken
             });
