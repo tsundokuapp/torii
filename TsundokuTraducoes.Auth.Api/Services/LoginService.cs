@@ -29,42 +29,50 @@ public class LoginService : ILoginService
         _userManager = userManager;
     }
 
-    public async Task<Result<LoginResponse>> LogaUsuario(LoginRequest loginRequest)
+    public async Task<Result<LoginInternalResult>> LogaUsuario(LoginRequest loginRequest)
     {
         var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.UserName.ToUpper());
 
         if (usuario == null)
             return Result.Fail("Erro ao logar: usuário ou senha inválidos");
         
-        var podeLogar = await _signInManager.CanSignInAsync(usuario);
-        if (!podeLogar)
+        if (!await _signInManager.CanSignInAsync(usuario))
         {
             // Se a autenticação por celular for habilitada, esse trecho precisa ser refatorado.
             return Result.Fail("Não é possível logar sem confirmar o e-mail.");
         }
         
-        var resultadoIdentity = await _signInManager.PasswordSignInAsync(loginRequest.UserName, loginRequest.Password, false, false);
+        var resultadoIdentity = await _signInManager.PasswordSignInAsync(
+            loginRequest.UserName,
+            loginRequest.Password,
+            false, 
+            false
+        );
+        
+        if (!resultadoIdentity.Succeeded)
+            return Result.Fail("Erro ao logar: usuário ou senha inválidos");
 
-        if (resultadoIdentity.Succeeded)
+        
+        var refreshToken = _tokenService.GenerateRefreshToken();
+        
+        usuario.RefreshToken = refreshToken;
+        usuario.RefreshTokenExpiryTime = 
+            DateTime.Now.AddMinutes(
+                ConfigurationAutenticacaoExternal.RetornaRefreshTokenValidityInMinutes()
+            );
+
+        await _userManager.UpdateAsync(usuario);
+
+        //Criando e retornando token com roles
+        var token = _tokenService.CreateToken(usuario, _signInManager.UserManager.GetRolesAsync(usuario).Result.ToList());
+
+        return Result.Ok(new LoginInternalResult
         {
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            usuario.RefreshToken = refreshToken;
-            usuario.RefreshTokenExpiryTime = DateTime.Now.AddMinutes(ConfigurationAutenticacaoExternal.RetornaRefreshTokenValidityInMinutes());
-
-            await _userManager.UpdateAsync(usuario);
-
-            //Criando e retornando token com roles
-            var token = _tokenService.CreateToken(usuario, _signInManager.UserManager.GetRolesAsync(usuario).Result.ToList());
-
-            return Result.Ok(new LoginResponse
-            {
-                UserName = usuario.UserName,
-                AccessToken = token.Value,
-                RefreshToken = usuario.RefreshToken
-            });
-        }
-
-        return Result.Fail("Erro ao logar: usuário ou senha inválidos");
+            UserName = usuario.UserName,
+            AccessToken = token.Value,
+            RefreshToken = usuario.RefreshToken,
+            RefreshTokenExpiry = usuario.RefreshTokenExpiryTime
+        });
     }
 
     public async Task<Result> RecuperarSenha(string email)

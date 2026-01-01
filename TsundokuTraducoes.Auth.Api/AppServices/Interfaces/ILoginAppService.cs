@@ -6,7 +6,7 @@ namespace TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 
 public interface ILoginAppService
 {
-    Task<Result<LoginResponse>> LogaUsuario(LoginRequest loginRequest);
+    Task<Result<LoginInternalResult>> LogaUsuario(LoginRequest loginRequest);
     Task<Result> RecuperarSenha(string email);
     Task<Result> ResetarSenha(ResetarSenhaRequest resetarSenhaRequest);
 }

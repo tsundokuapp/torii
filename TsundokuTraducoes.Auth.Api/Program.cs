@@ -17,6 +17,10 @@ var _integrationUrlBase = new IntegrationUrlBase();
 
 var builder = WebApplication.CreateBuilder(args);
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
 _acessoEmail.SmtpServer = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("SmtpServer");
 _acessoEmail.Port = Convert.ToInt32(builder.Configuration.GetSection("AcessoEmail").GetValue<string>("Port"));
 _acessoEmail.Remetente = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("Remetente");
@@ -37,21 +41,33 @@ ConfigurationAutenticacaoExternal.SetaAcessoExterno(_acessoEmail, _jwtConfigurat
 _connectionStringConfig.ConnectionString = builder.Configuration.GetConnectionString("UsuarioConnection");
 SourceConnection.SetaConnectionStringConfig(_connectionStringConfig);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins ?? Array.Empty<string>())
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddSqlConnection(_connectionStringConfig.ConnectionString!);
 
-//Injetando dependências do Identity
+//Injetando dependï¿½ncias do Identity
 builder.Services
     
     .AddIdentity<CustomIdentityUser, IdentityRole<int>>(
-        //Habilitando a opção de obrigação da confirmação do e-mail
+        //Habilitando a opï¿½ï¿½o de obrigaï¿½ï¿½o da confirmaï¿½ï¿½o do e-mail
         opt => opt.SignIn.RequireConfirmedEmail = true)
     .AddEntityFrameworkStores<UsuarioContext>()
-    //Adiciona um provedor de tokens para confirmação de acesso e afins
+    //Adiciona um provedor de tokens para confirmaï¿½ï¿½o de acesso e afins
     .AddDefaultTokenProviders();
 
 builder.Services.AddServices();
 
-//definindo configurações de autenticação
+//definindo configuraï¿½ï¿½es de autenticaï¿½ï¿½o
 builder.Services.AddAuthentication(auth =>
 {
     auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -112,6 +128,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

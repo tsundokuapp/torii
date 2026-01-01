@@ -15,7 +15,7 @@ public class LoginAppService : ILoginAppService
         _loginService = loginService;
     }
 
-    public async Task<Result<LoginResponse>> LogaUsuario(LoginRequest loginRequest)
+    public async Task<Result<LoginInternalResult>> LogaUsuario(LoginRequest loginRequest)
     {
         return await _loginService.LogaUsuario(loginRequest);
     }
