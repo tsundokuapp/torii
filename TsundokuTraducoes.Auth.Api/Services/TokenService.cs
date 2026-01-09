@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using TsundokuTraducoes.Auth.Api.DTOs;
-using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
@@ -57,38 +56,40 @@ public class TokenService : ITokenService
         return token;
     }
 
-    public async Task<Result<TokenResponse>> RefreshToken(TokenRequest tokenRequest)
+    public async Task<Result<TokenResponse>> RefreshToken(string refreshToken)
     {
-        string accessToken = tokenRequest.AccessToken;
-        string refreshToken = tokenRequest.RefreshToken;
+        
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            return Result.Fail("Refresh token inválido.");
+        
+        var user = _userManager.Users
+            .FirstOrDefault(u =>
+                u.RefreshToken == refreshToken &&
+                u.RefreshTokenExpiryTime > DateTime.UtcNow
+            );
 
-        var principal = GetPrincipalFromExpiredToken(accessToken);
-        if (principal.IsFailed)
-            return Result.Fail(principal.Errors[0]);
-
-        if (principal.ValueOrDefault is null)
-            return Result.Fail("Access token/refresh token inválido.");
-
-        var username = principal.ValueOrDefault.Claims.FirstOrDefault(x => x.Type == "username")?.Value;
-
-        var usuario = await _userManager.FindByNameAsync(username);
-
-        if (usuario == null || usuario.RefreshToken != refreshToken ||
-                   usuario.RefreshTokenExpiryTime <= DateTime.Now)
+        if (user == null)
         {
-            return Result.Fail("Access token/refresh token inválido.");
+            Console.WriteLine("Refresh token inválido ou expirado.");
+            return Result.Fail("Sessão inválida ou expirada.");
         }
-
-        var newAccessToken = CreateJwtSecurityToken(usuario, _signInManager.UserManager.GetRolesAsync(usuario).Result.ToList());
+        
+        var newAccessToken = CreateJwtSecurityToken(user, _signInManager.UserManager.GetRolesAsync(user).Result.ToList());
         var newRefreshToken = GenerateRefreshToken();
 
-        usuario.RefreshToken = newRefreshToken;
-        await _userManager.UpdateAsync(usuario);
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = 
+            DateTime.Now.AddMinutes(
+                ConfigurationAutenticacaoExternal.RetornaRefreshTokenValidityInMinutes()
+            );
+        await _userManager.UpdateAsync(user);
 
         return Result.Ok(new TokenResponse
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-            RefreshToken = newRefreshToken
+            RefreshToken = newRefreshToken,
+            UserName = user.UserName,
+            RefreshTokenExpiry = user.RefreshTokenExpiryTime
         });
     }
 

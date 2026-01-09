@@ -14,17 +14,36 @@ public class TokenController : ControllerBase
         _tokenAppService = tokenAppService;
     }
         
-    [HttpPost("api/auth/refresh-token")]
-    public async Task<IActionResult> RefreshToken(TokenRequest tokenRequest)
+    [HttpGet("api/auth/refresh-token")]
+    public async Task<IActionResult> RefreshToken()
     {
-        if (tokenRequest is null)
-            return BadRequest("Token request inválido");
+        var refreshToken = Request.Cookies["tsun_refresh_token"];
 
-        var result = await _tokenAppService.RefreshToken(tokenRequest);
+        if (string.IsNullOrEmpty(refreshToken))
+            return Unauthorized();
+
+        var result = await _tokenAppService.RefreshToken(refreshToken);
 
         if (result.IsFailed)
             return BadRequest(result.Errors[0]);
+        
+        Response.Cookies.Append(
+            "tsun_refresh_token",
+            result.Value.RefreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax, // SameSiteMode.Strict, usar esse se tiver no mesmo domínio.
+                Expires  = result.Value.RefreshTokenExpiry,
+                Path = "/"
+            }
+        );
 
-        return Ok(result.ValueOrDefault);
+        return Ok( new
+        {
+            result.Value.UserName,
+            result.Value.AccessToken,
+        });
     }
 }

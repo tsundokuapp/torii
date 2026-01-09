@@ -6,5 +6,5 @@ namespace TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 
 public interface ITokenAppService
 {
-    Task<Result<TokenResponse>> RefreshToken(TokenRequest tokenRequest);
+    Task<Result<TokenResponse>> RefreshToken(string refreshToken);
 }

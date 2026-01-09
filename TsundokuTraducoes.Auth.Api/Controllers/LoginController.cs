@@ -36,7 +36,7 @@ public class LoginController : ControllerBase
         var login = result.Value;
         
         Response.Cookies.Append(
-            "refresh_token",
+            "tsun_refresh_token",
             login.RefreshToken,
             new CookieOptions
             {
@@ -44,7 +44,7 @@ public class LoginController : ControllerBase
                 Secure = true,
                 SameSite = SameSiteMode.Lax, // SameSiteMode.Strict, usar esse se tiver no mesmo domínio.
                 Expires  = login.RefreshTokenExpiry,
-                Path = "api/auth/refresh-token"
+                Path = "/"
             }
         );
 

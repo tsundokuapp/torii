@@ -10,7 +10,7 @@ public interface ITokenService
 {
     Token CreateToken(CustomIdentityUser usuario, List<string> roles);
 
-    Task<Result<TokenResponse>> RefreshToken(TokenRequest tokenRequest);
+    Task<Result<TokenResponse>> RefreshToken(string refreshToken);
 
     string GenerateRefreshToken();
 

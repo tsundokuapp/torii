@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
-using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
 
@@ -15,8 +14,8 @@ public class TokenAppService : ITokenAppService
         _tokenService = tokenService;
     }
 
-    public async Task<Result<TokenResponse>> RefreshToken(TokenRequest tokenRequest)
+    public async Task<Result<TokenResponse>> RefreshToken(string refreshToken)
     {
-        return await _tokenService.RefreshToken(tokenRequest);
+        return await _tokenService.RefreshToken(refreshToken);
     }
 }
