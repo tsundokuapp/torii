@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
-using TsundokuTraducoes.Auth.Api.DTOs.Request;
 
 namespace TsundokuTraducoes.Auth.Api.Controllers;
 

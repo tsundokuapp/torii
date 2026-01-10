@@ -6,4 +6,5 @@ public class LoginInternalResult
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
         public DateTime RefreshTokenExpiry { get; set; }
+        public Guid TsunId { get; set; }
 }

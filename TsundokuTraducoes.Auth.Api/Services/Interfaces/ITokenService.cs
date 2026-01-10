@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using TsundokuTraducoes.Auth.Api.DTOs;
-using TsundokuTraducoes.Auth.Api.DTOs.Request;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
 
