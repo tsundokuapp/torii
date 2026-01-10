@@ -74,4 +74,12 @@ public class LoginController : ControllerBase
 
         return Ok(result.Successes[0]);
     }
+    
+    [HttpGet("api/auth/logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("tsun_refresh_token");
+        Response.Cookies.Delete(".AspNetCore.Identity.Application");
+        return Ok();
+    }
 }
