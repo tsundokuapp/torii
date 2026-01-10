@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +31,7 @@ public class CadastroService : ICadastroService
             return Result.Fail("E-mail já cadastrado");
 
         var usuario = _mapper.Map<Usuario>(cadastroUsuarioDTO);
+        usuario.TsunId = Guid.NewGuid();
         CustomIdentityUser usuarioIdentity = _mapper.Map<CustomIdentityUser>(usuario);
         var resultadoIdentity = await _userManager.CreateAsync(usuarioIdentity, cadastroUsuarioDTO.Senha);
 
