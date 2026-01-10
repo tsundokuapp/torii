@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Web;
 using TsundokuTraducoes.Auth.Api.DTOs;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
-using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
 using TsundokuTraducoes.Helpers.Configuration;
@@ -71,7 +70,8 @@ public class LoginService : ILoginService
             UserName = usuario.UserName,
             AccessToken = token.Value,
             RefreshToken = usuario.RefreshToken,
-            RefreshTokenExpiry = usuario.RefreshTokenExpiryTime
+            RefreshTokenExpiry = usuario.RefreshTokenExpiryTime,
+            TsunId = usuario.TsunId
         });
     }
 
