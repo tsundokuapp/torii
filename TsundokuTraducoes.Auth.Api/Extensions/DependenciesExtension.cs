@@ -27,6 +27,5 @@ public static class DependenciesExtension
         services.AddScoped<ITokenService, TokenService>();
         
         services.AddScoped<IEmailService, EmailService>();
-
     }
 }
