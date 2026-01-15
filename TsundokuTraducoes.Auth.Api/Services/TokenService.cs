@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
@@ -41,9 +41,9 @@ public class TokenService : ITokenService
             new Claim("username", usuario.UserName),
             new Claim("id", usuario.Id.ToString())
         ];
-
+                
         roles.ForEach(
-            role => claims.Add(new Claim(ClaimTypes.Role, role))
+            role => claims.Add(new Claim("roles", role))
         );
 
         var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretToken()));
