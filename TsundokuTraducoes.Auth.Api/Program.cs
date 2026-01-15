@@ -79,6 +79,8 @@ builder.Services.AddAuthentication(auth =>
     token.SaveToken = true;
     token.TokenValidationParameters = new TokenValidationParameters
     {
+        // Essa opção permite que o middleware entenda que agora será usado o claim "roles" e não o do schema do identity (ClaimTypes.Role)
+        RoleClaimType = "roles",
         ValidateIssuerSigningKey = true,
         //Mesma chave feita na classe Token Service
         IssuerSigningKey = new SymmetricSecurityKey(
