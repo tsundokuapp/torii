@@ -1,6 +1,7 @@
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using TsundokuTraducoes.Auth.Api.Data.Context;
 using TsundokuTraducoes.Auth.Api.DTOs;
 using TsundokuTraducoes.Auth.Api.DTOs.Response;
 using TsundokuTraducoes.Auth.Api.Entities;
@@ -20,31 +22,65 @@ public class TokenService : ITokenService
 {
     private readonly SignInManager<CustomIdentityUser> _signInManager;
     private readonly UserManager<CustomIdentityUser> _userManager;
+    private readonly UsuarioContext _context;
 
-    public TokenService(SignInManager<CustomIdentityUser> signInManager, UserManager<CustomIdentityUser> userManager, IEmailService emailServices)
+    public TokenService(SignInManager<CustomIdentityUser> signInManager, UserManager<CustomIdentityUser> userManager, IEmailService emailServices, UsuarioContext context)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _context = context;
     }
 
     public Token CreateToken(CustomIdentityUser usuario, List<string> roles)
     {
-        var token = CreateJwtSecurityToken(usuario, roles);
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var claimsDinamicas = ObterClaimsDinamicasAtivas(usuario.Id).Result;
+        var permissoesRoles = ObterPermissoesPorRoles(roles).Result;
+
+        var token = CreateJwtSecurityToken(usuario, roles, claimsDinamicas, permissoesRoles);
+
+        // Handler configurado para não agrupar claims em arrays JSON
+        var handler = new JwtSecurityTokenHandler();
+        handler.OutboundClaimTypeMap.Clear();
+        var tokenString = handler.WriteToken(token);
+
         return new Token(tokenString);
     }
 
-    private static JwtSecurityToken CreateJwtSecurityToken(CustomIdentityUser usuario, List<string> roles)
+    private static JwtSecurityToken CreateJwtSecurityToken(
+        CustomIdentityUser usuario,
+        List<string> roles,
+        List<ClaimDinamica>? claimsDinamicas = null,
+        List<Permissao>? permissoesRoles = null)
     {
         List<Claim> claims =
         [
             new Claim("username", usuario.UserName),
-            new Claim("id", usuario.Id.ToString())
+            new Claim("id", usuario.Id.ToString()),
+            new Claim("tsun_id", usuario.TsunId.ToString())
         ];
-                
+
+        // Adicionar roles
         roles.ForEach(
             role => claims.Add(new Claim("roles", role))
         );
+
+        // Adicionar permissões das roles (formato hierárquico)
+        if (permissoesRoles != null)
+        {
+            foreach (var permissao in permissoesRoles)
+            {
+                claims.Add(new Claim("Permission", permissao.Valor));
+            }
+        }
+
+        // Adicionar claims dinâmicas (permissões específicas do usuário)
+        if (claimsDinamicas != null)
+        {
+            foreach (var claim in claimsDinamicas)
+            {
+                claims.Add(new Claim("Permission", claim.Valor));
+            }
+        }
 
         var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ConfigurationAutenticacaoExternal.RetornaJwtSecretToken()));
         var credenciais = new SigningCredentials(chave, SecurityAlgorithms.HmacSha256);
@@ -53,15 +89,33 @@ public class TokenService : ITokenService
             signingCredentials: credenciais,
             expires: DateTime.UtcNow.AddHours(1)
         );
+
         return token;
+    }
+
+    private async Task<List<ClaimDinamica>> ObterClaimsDinamicasAtivas(int userId)
+    {
+        return await _context.ClaimsDinamicas
+            .Where(c => c.UserId == userId && c.Ativo)
+            .Where(c => c.ExpiraEm == null || c.ExpiraEm > DateTime.UtcNow)
+            .ToListAsync();
+    }
+
+    private async Task<List<Permissao>> ObterPermissoesPorRoles(IList<string> roles)
+    {
+        return await _context.RolePermissoes
+            .Where(rp => roles.Contains(rp.Role!.Name!))
+            .Select(rp => rp.Permissao!)
+            .Distinct()
+            .ToListAsync();
     }
 
     public async Task<Result<TokenResponse>> RefreshToken(string refreshToken)
     {
-        
+
         if (string.IsNullOrWhiteSpace(refreshToken))
             return Result.Fail("Refresh token inválido.");
-        
+
         var user = _userManager.Users
             .FirstOrDefault(u =>
                 u.RefreshToken == refreshToken &&
@@ -73,12 +127,16 @@ public class TokenService : ITokenService
             Console.WriteLine("Refresh token inválido ou expirado.");
             return Result.Fail("Sessão inválida ou expirada.");
         }
-        
-        var newAccessToken = CreateJwtSecurityToken(user, _signInManager.UserManager.GetRolesAsync(user).Result.ToList());
+
+        var roles = await _signInManager.UserManager.GetRolesAsync(user);
+        var claimsDinamicas = await ObterClaimsDinamicasAtivas(user.Id);
+        var permissoesRoles = await ObterPermissoesPorRoles(roles);
+
+        var newAccessToken = CreateJwtSecurityToken(user, roles.ToList(), claimsDinamicas, permissoesRoles);
         var newRefreshToken = GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = 
+        user.RefreshTokenExpiryTime =
             DateTime.Now.AddMinutes(
                 ConfigurationAutenticacaoExternal.RetornaRefreshTokenValidityInMinutes()
             );
@@ -195,7 +253,7 @@ public class TokenService : ITokenService
     }
 
     public static T ByteArrayToObject<T>(byte[] bytes)
-    {        
+    {
         string json = Encoding.UTF8.GetString(bytes);
         return JsonSerializer.Deserialize<T>(json);
     }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TsundokuTraducoes.Auth.Api;
+using TsundokuTraducoes.Auth.Api.Authorization.Requirements;
 using TsundokuTraducoes.Auth.Api.Data.Context;
 using TsundokuTraducoes.Auth.Api.Entities;
 using TsundokuTraducoes.Auth.Api.Extensions;
@@ -57,7 +58,7 @@ builder.Services.AddSqlConnection(_connectionStringConfig.ConnectionString!);
 
 //Injetando depend�ncias do Identity
 builder.Services
-    
+
     .AddIdentity<CustomIdentityUser, IdentityRole<int>>(
         //Habilitando a op��o de obriga��o da confirma��o do e-mail
         opt => opt.SignIn.RequireConfirmedEmail = true)
@@ -66,6 +67,60 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddServices();
+
+// Configuração de políticas de autorização RBAC/ABAC
+builder.Services.AddAuthorization(options =>
+{
+    // Políticas RBAC
+    options.AddPolicy("ApenasAdmin", policy =>
+        policy.RequireRole("admin"));
+
+    options.AddPolicy("TradutorOuAdmin", policy =>
+        policy.RequireRole("admin", "tradutor"));
+
+    options.AddPolicy("UsuarioAutenticado", policy =>
+        policy.RequireAuthenticatedUser());
+
+    // Políticas ABAC
+    options.AddPolicy("RecursoProprio", policy =>
+        policy.Requirements.Add(new RecursoProprioRequirement()));
+
+    // Políticas baseadas em permissões
+    options.AddPolicy("PodeCriarObra", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Obras:Criar")));
+
+    options.AddPolicy("PodeEditarObra", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Obras:Editar")));
+
+    options.AddPolicy("PodeDeletarObra", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Obras:Deletar")));
+
+    options.AddPolicy("PodeCriarCapitulo", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Capitulos:Criar")));
+
+    options.AddPolicy("PodeEditarCapitulo", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Capitulos:Editar")));
+
+    options.AddPolicy("PodeDeletarCapitulo", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Capitulos:Deletar")));
+
+    options.AddPolicy("PodeGerenciarUsuarios", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("admin") ||
+            context.User.HasClaim("permissao", "Usuarios:Gerenciar")));
+});
 
 //definindo configura��es de autentica��o
 builder.Services.AddAuthentication(auth =>
@@ -77,6 +132,7 @@ builder.Services.AddAuthentication(auth =>
 {
     token.RequireHttpsMetadata = false;
     token.SaveToken = true;
+    token.MapInboundClaims = false; // Evita mapeamento automático de claims
     token.TokenValidationParameters = new TokenValidationParameters
     {
         // Essa opção permite que o middleware entenda que agora será usado o claim "roles" e não o do schema do identity (ClaimTypes.Role)
@@ -89,6 +145,47 @@ builder.Services.AddAuthentication(auth =>
         ValidateIssuer = false,
         ValidateAudience = false,
         ClockSkew = TimeSpan.Zero
+    };
+
+    // Processa arrays de claims (roles e Permission) corretamente
+    token.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var identity = context.Principal?.Identity as System.Security.Claims.ClaimsIdentity;
+            if (identity != null)
+            {
+                // Expande claims que são arrays JSON em claims individuais
+                var claimsToAdd = new List<System.Security.Claims.Claim>();
+                var claimsToRemove = new List<System.Security.Claims.Claim>();
+
+                foreach (var claim in identity.Claims.ToList())
+                {
+                    if (claim.Value.StartsWith("[") && claim.Value.EndsWith("]"))
+                    {
+                        try
+                        {
+                            var values = System.Text.Json.JsonSerializer.Deserialize<string[]>(claim.Value);
+                            if (values != null)
+                            {
+                                claimsToRemove.Add(claim);
+                                foreach (var value in values)
+                                {
+                                    claimsToAdd.Add(new System.Security.Claims.Claim(claim.Type, value));
+                                }
+                            }
+                        }
+                        catch { /* Não é um array JSON válido, mantém a claim original */ }
+                    }
+                }
+
+                foreach (var claim in claimsToRemove)
+                    identity.RemoveClaim(claim);
+                foreach (var claim in claimsToAdd)
+                    identity.AddClaim(claim);
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 

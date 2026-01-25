@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TsundokuTraducoes.Auth.Api.Data.Context;
 
@@ -11,9 +12,11 @@ using TsundokuTraducoes.Auth.Api.Data.Context;
 namespace TsundokuTraducoes.Auth.Api.Migrations
 {
     [DbContext(typeof(UsuarioContext))]
-    partial class UsuarioContextModelSnapshot : ModelSnapshot
+    [Migration("20260125172402_Adicao_RBAC_ABAC")]
+    partial class Adicao_RBAC_ABAC
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,16 +301,16 @@ namespace TsundokuTraducoes.Auth.Api.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "dd9bc4d0-ce65-4fa3-afef-290275b34e66",
+                            ConcurrencyStamp = "804ef45c-db06-4dd6-8a81-451fd10c2dd1",
                             Email = "tsundokutraducoes@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "TSUNDOKUTRADUCOES@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEH8wf2r+DeNfsbTfoNoGgIZXmlkysfNvRwVcVq26gz26nPQH9kr5CZ0BbdRtR8NjQw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPV2efEDVfxEY9RE+0OU8CKEjqeRf1vNEDEZV7D8g9aofAPlFQaHY12LMIdSlA9NFA==",
                             PhoneNumberConfirmed = false,
                             RefreshTokenExpiryTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            SecurityStamp = "291a2949-64f1-4ed6-a5a9-eb2b1931a5f7",
+                            SecurityStamp = "635e141a-4563-4936-a743-bd877794624d",
                             TsunId = new Guid("00000000-0000-0000-0000-000000000000"),
                             TwoFactorEnabled = false,
                             UserName = "admin"
@@ -322,13 +325,19 @@ namespace TsundokuTraducoes.Auth.Api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Acao")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Descricao")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Valor")
+                    b.Property<string>("Nome")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Recurso")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -339,72 +348,83 @@ namespace TsundokuTraducoes.Auth.Api.Migrations
                         new
                         {
                             Id = 1,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8460),
-                            Descricao = "Visualizar qualquer obra",
-                            Valor = "obra.visualizar"
+                            Acao = "Visualizar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3500),
+                            Descricao = "Permite visualizar obras",
+                            Nome = "VisualizarObras",
+                            Recurso = "Obras"
                         },
                         new
                         {
                             Id = 2,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8460),
-                            Descricao = "Criar obras",
-                            Valor = "obra.criar"
+                            Acao = "Criar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3500),
+                            Descricao = "Permite criar obras",
+                            Nome = "CriarObras",
+                            Recurso = "Obras"
                         },
                         new
                         {
                             Id = 3,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8460),
-                            Descricao = "Editar qualquer obra",
-                            Valor = "obra.editar"
+                            Acao = "Editar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3500),
+                            Descricao = "Permite editar obras",
+                            Nome = "EditarObras",
+                            Recurso = "Obras"
                         },
                         new
                         {
                             Id = 4,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Deletar qualquer obra",
-                            Valor = "obra.deletar"
+                            Acao = "Deletar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite deletar obras",
+                            Nome = "DeletarObras",
+                            Recurso = "Obras"
                         },
                         new
                         {
                             Id = 5,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Visualizar qualquer capítulo",
-                            Valor = "capitulo.visualizar"
+                            Acao = "Visualizar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite visualizar capítulos",
+                            Nome = "VisualizarCapitulos",
+                            Recurso = "Capitulos"
                         },
                         new
                         {
                             Id = 6,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Criar capítulos",
-                            Valor = "capitulo.criar"
+                            Acao = "Criar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite criar capítulos",
+                            Nome = "CriarCapitulos",
+                            Recurso = "Capitulos"
                         },
                         new
                         {
                             Id = 7,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Editar qualquer capítulo",
-                            Valor = "capitulo.editar"
+                            Acao = "Editar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite editar capítulos",
+                            Nome = "EditarCapitulos",
+                            Recurso = "Capitulos"
                         },
                         new
                         {
                             Id = 8,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Deletar qualquer capítulo",
-                            Valor = "capitulo.deletar"
+                            Acao = "Deletar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite deletar capítulos",
+                            Nome = "DeletarCapitulos",
+                            Recurso = "Capitulos"
                         },
                         new
                         {
                             Id = 9,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Gerenciar usuários",
-                            Valor = "usuario.gerenciar"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CriadoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8470),
-                            Descricao = "Acesso total a todos os recursos",
-                            Valor = "*.*"
+                            Acao = "Gerenciar",
+                            CriadoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3510),
+                            Descricao = "Permite gerenciar usuários",
+                            Nome = "GerenciarUsuarios",
+                            Recurso = "Usuarios"
                         });
                 });
 
@@ -429,56 +449,104 @@ namespace TsundokuTraducoes.Auth.Api.Migrations
                         new
                         {
                             RoleId = 1,
-                            PermissaoId = 10,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8490)
+                            PermissaoId = 1,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 2,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 3,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 4,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 5,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 6,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 7,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 8,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissaoId = 9,
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 1,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 2,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3540)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 3,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 5,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 6,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             RoleId = 3,
                             PermissaoId = 7,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             RoleId = 2,
                             PermissaoId = 1,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             RoleId = 2,
                             PermissaoId = 5,
-                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 46, 40, 802, DateTimeKind.Utc).AddTicks(8500)
+                            AtribuidoEm = new DateTime(2026, 1, 25, 17, 24, 2, 386, DateTimeKind.Utc).AddTicks(3550)
                         });
                 });
 

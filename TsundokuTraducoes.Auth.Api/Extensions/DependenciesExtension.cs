@@ -1,5 +1,7 @@
-﻿using TsundokuTraducoes.Auth.Api.AppServices;
+﻿using Microsoft.AspNetCore.Authorization;
+using TsundokuTraducoes.Auth.Api.AppServices;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
+using TsundokuTraducoes.Auth.Api.Authorization.Handlers;
 using TsundokuTraducoes.Auth.Api.Data.Context;
 using TsundokuTraducoes.Auth.Api.Services;
 using TsundokuTraducoes.Auth.Api.Services.Interfaces;
@@ -25,7 +27,15 @@ public static class DependenciesExtension
 
         services.AddScoped<ITokenAppService, TokenAppService>();
         services.AddScoped<ITokenService, TokenService>();
-        
+
         services.AddScoped<IEmailService, EmailService>();
+
+        // RBAC/ABAC Services
+        services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IClaimsService, ClaimsService>();
+
+        // Authorization Handlers
+        services.AddScoped<IAuthorizationHandler, RecursoProprioHandler>();
+        services.AddScoped<IAuthorizationHandler, PermissaoHandler>();
     }
 }
