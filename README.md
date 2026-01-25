@@ -8,10 +8,10 @@ Este repo é a atualização backend do site para uma estrutura mais moderna e �
 
 A Tsundoku adoraria sua ajuda, apesar do esforço, o projeto é grande e muitos pontos ainda estão por serem decididos. Toda a ajuda é bem vinda e caso se interesse, segue alguns passos necessários para a contribuição:
 
-### Primeiros passos 
+### Primeiros passos
 
 - Fazer um fork do projeto
-- Clonar o projeto em sua máquina 
+- Clonar o projeto em sua máquina
 - Rodar o comando "git pull" para se certificar das alterações
 
 ## Orientações sobre Pull Requests
@@ -71,17 +71,70 @@ git push -f origin main
 
 # Iniciando o projeto (ambiente windows)
 
-- Adicione o arquivo appsettings.json, com os dados como a connectionString com informações do banco local ou remoto.
-- O arquivo encontra-se na pasta [AppSettings](https://drive.google.com/drive/u/1/folders/1AU3pLMLvJOsldQAfgREtgvv6mn_HFJJa)
+## Configuração de Variáveis de Ambiente
+
+O projeto utiliza variáveis de ambiente para dados sensíveis. Siga os passos:
+
+### Opção 1: Arquivo .env (Recomendado para desenvolvimento)
+
+1. Copie o arquivo de exemplo:
+```sh
+cp TsundokuTraducoes.Auth.Api/.env.example TsundokuTraducoes.Auth.Api/.env
+```
+
+2. Edite o `.env` com seus valores reais:
+```env
+ConnectionStrings__UsuarioConnection=Server=localhost;Database=DbTsundokuAuth;user=root;password=SUA_SENHA;
+AcessoEmail__Password=sua_senha_smtp
+AcessoEmail__EmailAdminInicial=admin@email.com
+AcessoEmail__SenhaAdminInicial=SenhaForte123!
+JwtConfiguration__SecretToken=gere_com_openssl_rand_hex_32
+JwtConfiguration__SecretTokenReset=gere_outro_token_diferente
+```
+
+3. Carregue as variáveis antes de rodar:
+```sh
+# Linux/Mac
+export $(cat .env | xargs)
+
+# Windows PowerShell
+Get-Content .env | ForEach-Object { $var = $_.Split('='); [Environment]::SetEnvironmentVariable($var[0], $var[1]) }
+```
+
+### Opção 2: Variáveis de ambiente do sistema
+
+Configure diretamente no seu sistema operacional ou no seu ambiente de deploy (Docker, Kubernetes, etc).
+
+### Gerar tokens JWT seguros
+
+```sh
+# Linux/Mac
+openssl rand -hex 32
+
+# Ou online: https://generate-secret.vercel.app/64
+```
+
+### Variáveis Obrigatórias
+
+| Variável | Descrição |
+|----------|-----------|
+| `ConnectionStrings__UsuarioConnection` | Connection string do banco MySQL |
+| `AcessoEmail__Password` | Senha do servidor SMTP |
+| `AcessoEmail__EmailAdminInicial` | Email do admin inicial |
+| `AcessoEmail__SenhaAdminInicial` | Senha do admin inicial |
+| `JwtConfiguration__SecretToken` | Secret para tokens JWT (64 chars hex) |
+| `JwtConfiguration__SecretTokenReset` | Secret para reset de senha (64 chars hex) |
+
+## Executando o projeto
 
 - instalar o pacote dotnet-ef >
 ```sh
 dotnet tool install --global dotnet-ef
 ```
 (_Geralmente é necessário no VSCode_)
-  - Rodar o comando ```update-database``` 
+  - Rodar o comando ```update-database```
     - Visual Studio Code > ```dotnet ef database update```
-    
+
 - E em seguida rodar o projeto para subir a api
   - Visual Studio Code > ```dotnet run```
 
@@ -107,7 +160,7 @@ docker run --name=mysql -e MYSQL_ROOT_PASSWORD=1234 -p 3306:3306 -d --network ts
 
 - Antes de gerar o build da imagem
   - Baixar o arquivo **"appsettings.json"** que se encontra no drive ``15 - Tsun Dev > Arquivos Config Api Tsun > TsundokuTraducoes `` e adicionar na pasta **"TsundokuTraducoes"**, dentro do projeto. (link da pasta acima)
-   
+
 - Buildar imagem
   ```sh
   docker build -t tsundokuapi_auth:1.0 .
@@ -119,9 +172,9 @@ docker run --name=mysql -e MYSQL_ROOT_PASSWORD=1234 -p 3306:3306 -d --network ts
 docker run --rm -it -p 8082:80 -p 8083:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORTS=8083 -e ASPNETCORE_Kestrel__Certificates__Default__Password="tsundokuapi" -e ASPNETCORE_ENVIRONMENT=Development -e ASPNETCORE_Kestrel__Certificates__Default__Path=/app/certificados/aspnetapp.pfx -v \TsundokuTraducoes.Auth.Api\.aspnet\https:/https/ --name tsundoku-api-auth tsundokuapi_auth:1.0
 ```
 
-- Observação: O link para o local host da api de auth é: 
+- Observação: O link para o local host da api de auth é:
 
-- Acessar BD 
+- Acessar BD
    - Usar id do container do banco de dados
       - ```docker exec -it id_imagem bash```
 
@@ -133,7 +186,7 @@ docker run --rm -it -p 8082:80 -p 8083:443 -e ASPNETCORE_URLS="https://+;http://
 
   - Seta a tabela para poder realizar as consultas sql (Caso banco local)
     - ```use DbTsundoku;```
-   
+
   - Seta a tabela para poder realizar as consultas sql (Caso banco remoto)
     - ```use u322048751_tsun_bd;```
 
@@ -146,9 +199,9 @@ docker run --rm -it -p 8082:80 -p 8083:443 -e ASPNETCORE_URLS="https://+;http://
 <br />
 <br />
 
-## Testes Unitários (Em construção) 
+## Testes Unitários (Em construção)
 
-## Testes de Integração (Em construção) 
+## Testes de Integração (Em construção)
 
 ## Observações sobre os testes
 

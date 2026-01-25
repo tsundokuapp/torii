@@ -1,0 +1,36 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AcessoEmail": {
+    "Remetente": "noreply@seudominio.com",
+    "SmtpServer": "smtp.seuservidor.com",
+    "Port": "465",
+    "Password": "",
+    "SenhaAdminInicial": "",
+    "EmailAdminInicial": ""
+  },
+  "ConnectionStrings": {
+    "UsuarioConnection": ""
+  },
+  "JwtConfiguration": {
+    "SecretToken": "",
+    "RefreshTokenValidityInMinutes": 10080,
+    "SecretTokenReset": "",
+    "ResetTokenValidityInMinutes": 15
+  },
+  "IntegrationUrlBase": {
+    "UrlBaseTsundokuApi": "https://localhost:8083/api/auth",
+    "UrlBaseTsundokuWeb": "https://localhost:8083/api/auth"
+  },
+  "AllowedHosts": "*",
+  "Cors": {
+    "AllowedOrigins": [
+      "http://localhost:3000",
+      "https://localhost:3000"
+    ]
+  }
+}

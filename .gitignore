@@ -6,11 +6,20 @@
 /TsundokuTraducoes.Auth.Api/.vs/TsundokuTraducoes.Auth.Api
 /TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/bin/Debug/net8.0
 /TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/obj
-/TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api/appsettings.json
 /TsundokuTraducoes.Helpers/obj
 /TsundokuTraducoes.Helpers/bin
 /TsundokuTraducoes.Auth.Api/.vs/ProjectEvaluation
 
+# Arquivos de ambiente com segredos
+.env
+.env.local
+.env.production
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+docker-compose.override.yml
+docker-compose.local.yml
 
 # Config files
 /.idea/
@@ -31,8 +40,8 @@
 x64/
 [Bb]in/
 [Oo]bj/
-/TsundokuTraducoes.Auth.Api/appsettings.json
 
 # Arquivos MacOS
 .DS_Store
 .idea
+TODO.md

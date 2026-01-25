@@ -1,0 +1,46 @@
+# docker-compose.yml - Exemplo de configuração
+
+version: '3.8'
+
+services:
+  torii-auth-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+      - "8083:8083"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__UsuarioConnection=Server=db;Database=DbTsundokuAuth;user=root;password=SUA_SENHA;SslMode=None;
+      - AcessoEmail__SmtpServer=smtp.seuservidor.com
+      - AcessoEmail__Port=465
+      - AcessoEmail__Password=SUA_SENHA_SMTP
+      - AcessoEmail__Remetente=noreply@seudominio.com
+      - AcessoEmail__EmailAdminInicial=admin@seudominio.com
+      - AcessoEmail__SenhaAdminInicial=SenhaForteDoAdmin123!
+      - JwtConfiguration__SecretToken=GERE_UM_TOKEN_SEGURO_COM_64_CARACTERES
+      - JwtConfiguration__SecretTokenReset=GERE_OUTRO_TOKEN_SEGURO
+    networks:
+      - tsundoku
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=SUA_SENHA
+      - MYSQL_DATABASE=DbTsundokuAuth
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - tsundoku
+
+networks:
+  tsundoku:
+    driver: bridge
+
+volumes:
+  mysql_data:
