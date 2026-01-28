@@ -1,8 +1,7 @@
 # Esta fase � usada para baixar o .net runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8082
-EXPOSE 8083
+EXPOSE 8080
 
 # Esta fase � usada para compilar o projeto de servi�o
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

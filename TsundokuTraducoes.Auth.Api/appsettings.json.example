@@ -32,5 +32,9 @@
       "http://localhost:3000",
       "https://localhost:3000"
     ]
+  },
+  "CertificateSettings": {
+    "Path": "/app/caminho/para/certificado/certificado.pfx",
+    "Password": "senhaDaGeracaoDoCertificado"
   }
 }

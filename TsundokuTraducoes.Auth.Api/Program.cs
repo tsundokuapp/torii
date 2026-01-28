@@ -22,6 +22,13 @@ var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>();
 
+var CertificatePassword = builder.Configuration
+    .GetSection("CertificateSettings")
+    .GetValue<string>("Password");
+var CertificatePath = builder.Configuration
+    .GetSection("CertificateSettings")
+    .GetValue<string>("Path");
+
 _acessoEmail.SmtpServer = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("SmtpServer");
 _acessoEmail.Port = Convert.ToInt32(builder.Configuration.GetSection("AcessoEmail").GetValue<string>("Port"));
 _acessoEmail.Remetente = builder.Configuration.GetSection("AcessoEmail").GetValue<string>("Remetente");
@@ -219,6 +226,17 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 LoadConfiguration(app);
 
+if (app.Environment.IsProduction())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(8080, listenOptions =>
+        {
+            listenOptions.UseHttps(CertificatePath, CertificatePassword);
+        });
+    });
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -226,7 +244,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

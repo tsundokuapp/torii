@@ -18,6 +18,13 @@ public class LoginController : ControllerBase
     {
         _loginAppService = loginAppService;
     }
+    
+    // Endpoint de helth check
+    [HttpGet("/")]
+    public IActionResult Get()
+    {
+        return Ok("Auth API is running.");
+    }
 
     [HttpPost("api/auth/login/")]
     public async Task<IActionResult> LogarUsuario(LoginRequest loginRequest)

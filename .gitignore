@@ -45,3 +45,5 @@ x64/
 .DS_Store
 .idea
 TODO.md
+docker-compose.yml
+Dockerrun.aws.json
