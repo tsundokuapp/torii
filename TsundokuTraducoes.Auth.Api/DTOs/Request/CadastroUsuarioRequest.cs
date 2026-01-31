@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TsundokuTraducoes.Auth.Api.DTOs.Request
 {
     public class CadastroUsuarioRequest
     {
         [Required]
-        public string UserName { get; set; }
+        public string Usuario { get; set; }
 
         [Required]
         [DataType(DataType.EmailAddress)]

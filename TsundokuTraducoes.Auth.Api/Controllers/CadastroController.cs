@@ -29,7 +29,7 @@ public class CadastroController : ControllerBase
         {
             return BadRequest(new { message = "Senha é obrigatório." });
         }
-        
+        B
         if (cadastroUsuarioRequest.Email == null)
         {
             return BadRequest(new { message = "E-mail é obrigatório." });
