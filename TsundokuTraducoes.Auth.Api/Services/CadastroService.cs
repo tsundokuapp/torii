@@ -30,7 +30,7 @@ public class CadastroService : ICadastroService
         if (usuarioExistente is not null)
             return Result.Fail("E-mail já cadastrado");
 
-        var usuario = _mapper.Map<Usuario>(cadastroUsuarioDTO);
+        var usuario = _mapper.Map<EntidadeUsuario>(cadastroUsuarioDTO);
         usuario.TsunId = Guid.NewGuid();
         CustomIdentityUser usuarioIdentity = _mapper.Map<CustomIdentityUser>(usuario);
         var resultadoIdentity = await _userManager.CreateAsync(usuarioIdentity, cadastroUsuarioDTO.Senha);

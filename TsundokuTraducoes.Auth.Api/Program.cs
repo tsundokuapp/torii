@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -212,6 +213,32 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = int.MaxValue;
 });
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.Select(er => er.ErrorMessage).ToArray()
+            );
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Erro de Validação",
+            Detail = "Um ou mais campos estão incorretos.",
+            Instance = context.HttpContext.Request.Path
+        };
+
+        // Adiciona os erros específicos do Identity/DataAnnotations
+        problemDetails.Extensions.Add("errors", errors);
+
+        return new BadRequestObjectResult(problemDetails);
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -223,7 +250,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Registra os handlers (do mais específico para o mais genérico)
+//builder.Services.AddExceptionHandler<BusinessExceptionHandler>();
+
+// Adiciona suporte ao padrão ProblemDetails
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+// Ativa o middleware de tratamento de exceção
+app.UseExceptionHandler();
+
 LoadConfiguration(app);
 
 if (app.Environment.IsProduction())

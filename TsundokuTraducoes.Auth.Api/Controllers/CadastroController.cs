@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using FluentResults;
+using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
+using TsundokuTraducoes.Auth.Api.Entities;
 
 namespace TsundokuTraducoes.Auth.Api.Controllers;
 
@@ -18,7 +20,7 @@ public class CadastroController : ControllerBase
     public async Task<IActionResult> CadastraUsuario([FromBody] CadastroUsuarioRequest cadastroUsuarioRequest)
     {
         
-        if (cadastroUsuarioRequest.UserName == null)
+        if (cadastroUsuarioRequest.Usuario == null)
         {
             return BadRequest(new { message = "Nome de usuário é obrigatório." });
         }
@@ -37,7 +39,7 @@ public class CadastroController : ControllerBase
         if (result.IsFailed)
             return BadRequest(result.Errors[0].Message);
 
-        return Ok(result.ValueOrDefault);
+        return Ok(result);
     }
 
     [HttpGet("api/auth/ativar-conta/")]
