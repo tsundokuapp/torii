@@ -13,6 +13,8 @@ public class AutenticacaoProfile : Profile
         CreateMap<EntidadeUsuario, IdentityUser<int>>()
             .ForMember(x => x.UserName, opt => opt.MapFrom(src => src.Usuario));
 
-        CreateMap<EntidadeUsuario, CustomIdentityUser>();
+        CreateMap<EntidadeUsuario, CustomIdentityUser>()
+            .ForMember(x => x.UserName, opt => opt.MapFrom(src => src.Usuario))
+            .ForMember(x => x.Email, opt => opt.MapFrom(src => src.Email));
     }
 }

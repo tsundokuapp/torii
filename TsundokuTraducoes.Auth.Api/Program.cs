@@ -242,28 +242,10 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("tsundokuAuthApp", builder =>
-    {
-        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
-
-// Registra os handlers (do mais específico para o mais genérico)
-//builder.Services.AddExceptionHandler<BusinessExceptionHandler>();
-
 // Adiciona suporte ao padrão ProblemDetails
 builder.Services.AddProblemDetails();
 
-var app = builder.Build();
-
-// Ativa o middleware de tratamento de exceção
-app.UseExceptionHandler();
-
-LoadConfiguration(app);
-
-if (app.Environment.IsProduction())
+if (builder.Environment.IsProduction())
 {
     builder.WebHost.ConfigureKestrel(options =>
     {
@@ -274,6 +256,13 @@ if (app.Environment.IsProduction())
     });
 }
 
+var app = builder.Build();
+
+// Ativa o middleware de tratamento de exceção
+app.UseExceptionHandler();
+
+LoadConfiguration(app);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -281,7 +270,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
