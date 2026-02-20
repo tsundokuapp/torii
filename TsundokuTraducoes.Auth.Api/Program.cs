@@ -245,16 +245,7 @@ builder.Services.AddSwaggerGen();
 // Adiciona suporte ao padrão ProblemDetails
 builder.Services.AddProblemDetails();
 
-if (builder.Environment.IsProduction())
-{
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenAnyIP(8080, listenOptions =>
-        {
-            listenOptions.UseHttps(CertificatePath, CertificatePassword);
-        });
-    });
-}
+
 
 var app = builder.Build();
 
@@ -270,7 +261,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

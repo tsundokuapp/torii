@@ -1,46 +1,34 @@
-# docker-compose.yml - Exemplo de configuração
-
-version: '3.8'
-
 services:
   torii-auth-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-tsundokuapp/torii-auth-api:latest}
+    container_name: torii-auth-api
+    restart: unless-stopped
     ports:
-      - "8082:8082"
-      - "8083:8083"
+      - "8080:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__UsuarioConnection=Server=db;Database=DbTsundokuAuth;user=root;password=SUA_SENHA;SslMode=None;
-      - AcessoEmail__SmtpServer=smtp.seuservidor.com
-      - AcessoEmail__Port=465
-      - AcessoEmail__Password=SUA_SENHA_SMTP
-      - AcessoEmail__Remetente=noreply@seudominio.com
-      - AcessoEmail__EmailAdminInicial=admin@seudominio.com
-      - AcessoEmail__SenhaAdminInicial=SenhaForteDoAdmin123!
-      - JwtConfiguration__SecretToken=GERE_UM_TOKEN_SEGURO_COM_64_CARACTERES
-      - JwtConfiguration__SecretTokenReset=GERE_OUTRO_TOKEN_SEGURO
-    networks:
-      - tsundoku
-    depends_on:
-      - db
-
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=SUA_SENHA
-      - MYSQL_DATABASE=DbTsundokuAuth
-    ports:
-      - "3306:3306"
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_URLS=http://+:8080
+      # Banco de Dados
+      - ConnectionStrings__UsuarioConnection=${DATABASE_CONNECTION_STRING}
+      # JWT
+      - JwtConfiguration__SecretToken=${JWT_SECRET_TOKEN}
+      - JwtConfiguration__SecretTokenReset=${JWT_SECRET_TOKEN_RESET}
+      - JwtConfiguration__RefreshTokenValidityInMinutes=${JWT_REFRESH_TOKEN_MINUTES:-10080}
+      - JwtConfiguration__ResetTokenValidityInMinutes=${JWT_RESET_TOKEN_MINUTES:-15}
+      # Email SMTP
+      - AcessoEmail__SmtpServer=${SMTP_SERVER}
+      - AcessoEmail__Remetente=${SMTP_REMETENTE}
+      - AcessoEmail__Password=${SMTP_PASSWORD}
+      - AcessoEmail__Port=${SMTP_PORT:-465}
+      - AcessoEmail__EmailAdminInicial=${ADMIN_EMAIL}
+      - AcessoEmail__SenhaAdminInicial=${ADMIN_PASSWORD}
+      # URLs de Integração
+      - IntegrationUrlBase__UrlBaseTsundokuApi=${INTEGRATION_URL_API}
+      - IntegrationUrlBase__UrlBaseTsundokuWeb=${INTEGRATION_URL_WEB}
+      # CORS
+      - Cors__AllowedOrigins__0=${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - tsundoku
-
-networks:
-  tsundoku:
-    driver: bridge
+      - dataprotection_keys:/app/keys
 
 volumes:
-  mysql_data:
+  dataprotection_keys:

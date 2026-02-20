@@ -1,47 +1,45 @@
-# Esta fase � usada para baixar o .net runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Esta fase � usada para compilar o projeto de servi�o
+# ========================================
+# Build Stage
+# ========================================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY ["TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj", "TsundokuTraducoes.Auth.Api/"]
-COPY ["TsundokuTraducoes.Helpers/TsundokuTraducoes.Helpers.csproj", "TsundokuTraducoes.Helpers/"]
+# Copia os arquivos de projeto primeiro para aproveitar o cache do Docker
+COPY TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj TsundokuTraducoes.Auth.Api/
+COPY TsundokuTraducoes.Helpers/TsundokuTraducoes.Helpers.csproj TsundokuTraducoes.Helpers/
+COPY TsundokuTraducoes.Auth.Api.sln ./
 
-RUN dotnet restore "./TsundokuTraducoes.Auth.Api/TsundokuTraducoes.Auth.Api.csproj"
+# Restaura as dependências
+RUN dotnet restore TsundokuTraducoes.Auth.Api.sln
 
+# Copia todo o código fonte
 COPY . .
 
-WORKDIR "/src/TsundokuTraducoes.Auth.Api"
-RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build /p:UseAppHost=false
+# Build da aplicação
+WORKDIR /src/TsundokuTraducoes.Auth.Api
+RUN dotnet build -c Release -o /app/build
 
-FROM build as publish
-ARG BUILD_CONFIGURATION=Release
-# Execute publish no diret�rio correto
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Publica a aplicação
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+# ========================================
+# Runtime Stage
+# ========================================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=publish /app/publish .
 
-# CORRE��O AQUI: Ajuste o caminho de origem do certificado para ser relativo ao contexto (se estiver na raiz)
-# Se a pasta TsundokuTraducoes.Helpers estiver na raiz do seu build context:
-RUN mkdir -p /app/certificados
-COPY TsundokuTraducoes.Helpers/Certificados/aspnetapp.pfx /app/certificados
+# Copia os arquivos publicados
+COPY --from=build /app/publish .
 
-# Variáveis de ambiente (valores padrão, sobrescreva no docker run ou docker-compose)
+# Cria diretório para data protection keys
+RUN mkdir -p /app/keys
+
+# Define variáveis de ambiente padrão
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ConnectionStrings__UsuarioConnection=""
-ENV AcessoEmail__SmtpServer=""
-ENV AcessoEmail__Port="465"
-ENV AcessoEmail__Password=""
-ENV AcessoEmail__Remetente=""
-ENV AcessoEmail__EmailAdminInicial=""
-ENV AcessoEmail__SenhaAdminInicial=""
-ENV JwtConfiguration__SecretToken=""
-ENV JwtConfiguration__SecretTokenReset=""
+ENV ASPNETCORE_URLS=http://+:8080
 
-ENTRYPOINT [ "dotnet", "TsundokuTraducoes.Auth.Api.dll" ]
+# Expõe a porta da aplicação
+EXPOSE 8080
+
+# Comando de entrada
+ENTRYPOINT ["dotnet", "TsundokuTraducoes.Auth.Api.dll"]
