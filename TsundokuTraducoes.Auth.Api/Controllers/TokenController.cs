@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 
 namespace TsundokuTraducoes.Auth.Api.Controllers;
@@ -41,7 +41,7 @@ public class TokenController : ControllerBase
 
         return Ok( new
         {
-            result.Value.UserName,
+            result.Value.Usuario,
             result.Value.AccessToken,
             result.Value.TsunId
         });

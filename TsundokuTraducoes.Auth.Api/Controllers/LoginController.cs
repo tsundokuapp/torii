@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
@@ -29,10 +29,10 @@ public class LoginController : ControllerBase
     [HttpPost("api/auth/login/")]
     public async Task<IActionResult> LogarUsuario(LoginRequest loginRequest)
     {
-        if (loginRequest.UserName == null)
+        if (loginRequest.Usuario == null)
             return BadRequest(new { message = "Nome de usuário é obrigatório." });
 
-        if (loginRequest.Password == null)
+        if (loginRequest.Senha == null)
             return BadRequest(new { message = "Senha é obrigatória." });
         
         var result = await _loginAppService.LogaUsuario(loginRequest);
@@ -57,7 +57,7 @@ public class LoginController : ControllerBase
 
         return Ok( new
         {
-            login.UserName,
+            login.Usuario,
             login.AccessToken,
             login.TsunId
         });

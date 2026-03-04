@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
@@ -30,7 +30,7 @@ public class LoginService : ILoginService
 
     public async Task<Result<LoginInternalResult>> LogaUsuario(LoginRequest loginRequest)
     {
-        var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.UserName.ToUpper());
+        var usuario = _userManager.Users.FirstOrDefault(x => x.NormalizedUserName == loginRequest.Usuario.ToUpper());
 
         if (usuario == null)
             return Result.Fail("Erro ao logar: usuário ou senha inválidos");
@@ -42,8 +42,8 @@ public class LoginService : ILoginService
         }
         
         var resultadoIdentity = await _signInManager.PasswordSignInAsync(
-            loginRequest.UserName,
-            loginRequest.Password,
+            loginRequest.Usuario,
+            loginRequest.Senha,
             false, 
             false
         );
@@ -67,7 +67,7 @@ public class LoginService : ILoginService
 
         return Result.Ok(new LoginInternalResult
         {
-            UserName = usuario.UserName,
+            Usuario = usuario.UserName,
             AccessToken = token.Value,
             RefreshToken = usuario.RefreshToken,
             RefreshTokenExpiry = usuario.RefreshTokenExpiryTime,
