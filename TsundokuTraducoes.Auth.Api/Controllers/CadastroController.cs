@@ -1,8 +1,6 @@
-using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 using TsundokuTraducoes.Auth.Api.DTOs.Request;
-using TsundokuTraducoes.Auth.Api.Entities;
 
 namespace TsundokuTraducoes.Auth.Api.Controllers;
 
