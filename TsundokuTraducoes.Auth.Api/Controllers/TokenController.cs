@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TsundokuTraducoes.Auth.Api.AppServices.Interfaces;
 
 namespace TsundokuTraducoes.Auth.Api.Controllers;
@@ -13,7 +13,7 @@ public class TokenController : ControllerBase
         _tokenAppService = tokenAppService;
     }
         
-    [HttpGet("api/auth/refresh-token")]
+    [HttpGet("api/refresh-token")]
     public async Task<IActionResult> RefreshToken()
     {
         var refreshToken = Request.Cookies["tsun_refresh_token"];
@@ -41,7 +41,7 @@ public class TokenController : ControllerBase
 
         return Ok( new
         {
-            result.Value.UserName,
+            result.Value.Usuario,
             result.Value.AccessToken,
             result.Value.TsunId
         });

@@ -146,7 +146,7 @@ public class TokenService : ITokenService
         {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
             RefreshToken = newRefreshToken,
-            UserName = user.UserName,
+            Usuario = user.UserName,
             TsunId = user.TsunId,
             RefreshTokenExpiry = user.RefreshTokenExpiryTime
         });
